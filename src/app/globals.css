@@ -179,12 +179,7 @@ a { color: inherit; }
 .nav-links { display: flex; gap: 22px; flex-wrap: wrap; }
 .nav-links a { font-family: var(--font-mono); font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; color: var(--dim); padding: 10px 0; }
 .nav-links a:hover { color: var(--ink); }
-@media (min-width: 768px) {
-  /* when the dock is present, the text links collapse into it but stay reachable by keyboard */
-  .nav-links-compact { position: absolute; left: -9999px; }
-  .nav-links-compact:focus-within { position: static; }
-}
-@media (max-width: 767px) { .nav-links { display: none; } .site-nav-row { justify-content: space-between; } .mobile-menu-hint { display: block; } }
+.nav-links[hidden] { display: none; }
 .dock-wrap { height: 110px; border-top: 1px solid var(--rule); background: #060807; position: relative; overflow: hidden; }
 .dock-host { position: absolute; inset: 0; }
 .site-footer { border-top: 1px solid var(--rule); margin-top: 96px; padding: 48px 0 64px; }

@@ -1,7 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
 import Scene from "../Scene";
-import { PanelPoster } from "../posters";
 import { useTheme } from "../ThemeToggle";
 
 const GaugesLive = dynamic(() => import("../live/GaugesLive"), { ssr: false });

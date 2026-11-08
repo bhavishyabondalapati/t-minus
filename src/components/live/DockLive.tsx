@@ -1,5 +1,6 @@
 "use client";
 import "@designcodeio/threeui/style.css";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatedTopDock } from "@designcodeio/threeui/components/AnimatedTopDock";
 
@@ -16,8 +17,9 @@ const ROUTES: Record<string, string> = {
   NOTES: "/reliability",
 };
 
-export default function DockLive() {
+export default function DockLive({ onReady }: { onReady?: () => void }) {
   const router = useRouter();
+  useEffect(() => { onReady?.(); }, [onReady]);
   return (
     <div
       className="dock-host"

@@ -33,25 +33,26 @@ export default function Board({
         <p className="label" style={{ color: "rgb(255 176 32 / 0.7)" }}>
           &gt; DEPARTURES · {title.toUpperCase()} → {toward.toUpperCase()}
         </p>
-        <div role="table" aria-label={`Next trains from ${title} toward ${toward}`} style={{ marginTop: 10, minHeight: 190 }}>
-          {rows.length === 0 && (
-            <p className="crt-cursor" role="status" style={{ padding: "18px 0" }}>
-              {status === "connecting" ? "LINKING TO MBTA" : status === "degraded" ? "MBTA FEED DOWN, RETRYING" : "NO TRAINS PREDICTED"}
-            </p>
-          )}
-          {rows.map(({ p, at }) => {
-            const secs = Math.max(0, Math.round((at - now) / 1000));
-            const mins = Math.floor(secs / 60);
-            const st = rowStatus(p);
-            return (
-              <div role="row" className="crt-row" key={p.id}>
-                <span role="cell" className="num" style={{ fontSize: "1.25rem" }}>{secs < 45 ? "BRD" : `${mins}m`}</span>
-                <span role="cell">{toward.toUpperCase()} <span className="crt-dim">· {fmtClock(at)}</span></span>
-                <span role="cell" className={st.cls}>{st.text}</span>
-              </div>
-            );
-          })}
-        </div>
+        {rows.length === 0 ? (
+          <p className="crt-cursor" role="status" style={{ padding: "18px 0", minHeight: 190 }}>
+            {status === "connecting" ? "LINKING TO MBTA" : status === "degraded" ? "MBTA FEED DOWN, RETRYING" : "NO TRAINS PREDICTED"}
+          </p>
+        ) : (
+          <div role="table" aria-label={`Next trains from ${title} toward ${toward}`} style={{ marginTop: 10, minHeight: 190 }}>
+            {rows.map(({ p, at }) => {
+              const secs = Math.max(0, Math.round((at - now) / 1000));
+              const mins = Math.floor(secs / 60);
+              const st = rowStatus(p);
+              return (
+                <div role="row" className="crt-row" key={p.id}>
+                  <span role="cell" className="num" style={{ fontSize: "1.25rem" }}>{secs < 45 ? "BRD" : `${mins}m`}</span>
+                  <span role="cell">{toward.toUpperCase()} <span className="crt-dim">· {fmtClock(at)}</span></span>
+                  <span role="cell" className={st.cls}>{st.text}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </Scene>
   );

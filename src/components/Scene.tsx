@@ -29,8 +29,8 @@ export default function Scene({ id, priority = 1, poster, live, label, className
       {running && <div className="scene-live" aria-hidden="true">{live}</div>}
       {children}
       {toggle && !staticOnly && (
-        <button type="button" className="btn btn-sm scene-toggle" aria-pressed={running} aria-label={`Live shader for ${label}`} onClick={() => pinScene(running ? null : id)}>
-          {running ? "● Live" : "○ Go live"}
+        <button type="button" className="btn btn-sm scene-toggle" aria-pressed={running} onClick={() => pinScene(running ? null : id)}>
+          {running ? "● Live" : "○ Go live"}<span className="sr-only"> shader, {label}</span>
         </button>
       )}
     </div>
