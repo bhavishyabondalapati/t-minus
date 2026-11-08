@@ -10,3 +10,7 @@ Each entry: what I decided, and why. Newest at the bottom.
 6. **argon2:** `@node-rs/argon2` (prebuilt binaries, works on Vercel without node-gyp).
 7. **Rate limiting** is a Postgres fixed-window counter table. No Redis, so no extra paid service.
 8. **Delay metric:** delay = actual arrival minus scheduled arrival. Actual arrival = first time the vehicle is seen STOPPED_AT the stop. If never seen, the last prediction before it vanished is used and flagged `source=last_prediction`.
+9. **Landscape iframe.** ThreeUI's `LandscapeScene` wrapper hardcodes `sandbox="allow-scripts"` (opaque origin) and the scene stays blank in our app, though the same HTML renders fine with `allow-same-origin`. So `LandscapeLive` embeds the same ThreeUI `landscape.html` (copied from the package, served same-origin) with `allow-scripts allow-same-origin` and the wrapper's exact variant/time/weather query mapping.
+10. **Scene slot = on screen.** A scene only competes for the one live WebGL slot while it is in the viewport. Priority: loader (100) > landscape (10) > arc (5) > CTA button (3) > board (2) > gauge/diagnostics (1). A per-panel "Live" switch pins a scene.
+11. **Weather location** is fixed at downtown Boston (42.3601, -71.0589) rather than per stop. One forecast per 10 minutes is enough for a buffer.
+12. **Direction** is inferred from stop order (destination after origin in route order = direction 0). On Red Line branches (Ashmont vs Braintree) that is approximate. Listed under known limits.
