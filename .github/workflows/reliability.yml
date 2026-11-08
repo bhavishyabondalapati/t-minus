@@ -1,0 +1,23 @@
+name: Reliability job
+# Every 15 minutes: poll predictions, reconcile them against actual arrivals, recompute delay stats.
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the protected endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          test -n "$CRON_SECRET" && test -n "$SITE_URL"
+          code=$(curl -sS -o out.json -w "%{http_code}" -X POST -H "Authorization: Bearer $CRON_SECRET" --max-time 90 "$SITE_URL/api/cron/reconcile")
+          cat out.json; echo
+          test "$code" = "200"
