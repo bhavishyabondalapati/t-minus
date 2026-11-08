@@ -207,6 +207,12 @@ describe("pickLandscapeVariant", () => {
   ])("clear at hour %i -> %s", (h, v) => {
     expect(pickLandscapeVariant("clear", h)).toBe(v);
   });
+  it("uses the forecast's isDaytime flag to pick night at dusk, but not to override weather", () => {
+    expect(pickLandscapeVariant("clear", 17, false)).toBe("night");
+    expect(pickLandscapeVariant("clear", 17, true)).toBe("sunset");
+    expect(pickLandscapeVariant("clear", 17, null)).toBe("sunset");
+    expect(pickLandscapeVariant("rain", 22, false)).toBe("rain");
+  });
   it("wraps out-of-range hours", () => {
     expect(pickLandscapeVariant("clear", 25)).toBe("night");
     expect(pickLandscapeVariant("clear", -1)).toBe("night");

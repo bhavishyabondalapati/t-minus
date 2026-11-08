@@ -147,10 +147,12 @@ export type LandscapeVariant = "sunrise" | "noon" | "sunset" | "night" | "rain" 
  * Choose a Landscape variant from weather + local time.
  * Precipitation wins; otherwise the time of day decides.
  */
-export function pickLandscapeVariant(category: WeatherCategory, localHour: number): LandscapeVariant {
+export function pickLandscapeVariant(category: WeatherCategory, localHour: number, isDaytime?: boolean | null): LandscapeVariant {
   if (category === "storm") return "storm";
   if (category === "snow") return "snow";
   if (category === "rain") return "rain";
+  // The forecast knows real sunset (it moves through the year), so trust it over the clock at dusk.
+  if (isDaytime === false) return "night";
   const h = ((Math.floor(localHour) % 24) + 24) % 24;
   if (h >= 5 && h < 9) return "sunrise";
   if (h >= 9 && h < 16) return "noon";

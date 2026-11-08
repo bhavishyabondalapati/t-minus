@@ -46,7 +46,7 @@ export async function getWeather(): Promise<Weather> {
       shortForecast,
       tempF: typeof p?.temperature === "number" ? p.temperature : null,
       precipProbability: p?.probabilityOfPrecipitation?.value ?? null,
-      variant: pickLandscapeVariant(category, bostonHour()),
+      variant: pickLandscapeVariant(category, bostonHour(), typeof p?.isDaytime === "boolean" ? p.isDaytime : null),
       stale: hourly.stale,
     };
   } catch {
