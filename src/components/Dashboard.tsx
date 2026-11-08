@@ -152,7 +152,8 @@ export default function Dashboard({ email, isDemo, initial, stats }: { email: st
     <div className="wrap dash">
       <aside className="dash-side" aria-label="Your commutes">
         <p className="label">Signed in as</p>
-        <p className="mono" style={{ wordBreak: "break-all" }}>{email}{isDemo ? " (demo)" : ""}</p>
+        <p className="mono" style={{ overflowWrap: "anywhere" }}>{email}</p>
+        {isDemo && <p className="label">Demo account</p>}
         <button className="btn btn-sm" style={{ marginTop: 10 }} onClick={async () => { await fetch("/api/auth/logout", { method: "POST" }); router.push("/"); router.refresh(); }}>Sign out</button>
         <hr style={{ border: 0, borderTop: "1px solid var(--rule)", margin: "20px 0" }} />
         <p className="label">Commutes</p>

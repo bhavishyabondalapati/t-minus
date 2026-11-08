@@ -66,17 +66,11 @@ export function LandscapePoster({ variant }: { variant: LandscapeVariant }) {
   );
 }
 
-/** Generic CRT / instrument panel fallback. */
+/** Generic instrument-panel fallback. "amber" is the always-dark CRT; "ink" follows the theme. */
 export function PanelPoster({ tone = "amber" }: { tone?: "amber" | "ink" }) {
-  const c = tone === "amber" ? "255,176,32" : "160,170,160";
-  return (
-    <div
-      aria-hidden="true"
-      style={{
-        position: "absolute",
-        inset: 0,
-        background: `radial-gradient(120% 90% at 50% 0%, rgba(${c},0.14), transparent 60%), repeating-linear-gradient(0deg, rgba(${c},0.05) 0 1px, transparent 1px 4px), #050806`,
-      }}
-    />
-  );
+  const background =
+    tone === "amber"
+      ? "radial-gradient(120% 90% at 50% 0%, rgba(255,176,32,0.14), transparent 60%), repeating-linear-gradient(0deg, rgba(255,176,32,0.05) 0 1px, transparent 1px 4px), #050806"
+      : "radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 60%), repeating-linear-gradient(0deg, color-mix(in srgb, var(--accent) 7%, transparent) 0 1px, transparent 1px 4px), var(--panel)";
+  return <div aria-hidden="true" style={{ position: "absolute", inset: 0, background }} />;
 }

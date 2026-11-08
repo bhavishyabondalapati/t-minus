@@ -198,9 +198,9 @@ a { color: inherit; }
 .arc-sub { font-size: 0.9rem; color: var(--dim); min-height: 1.4em; }
 .arc-math { margin-top: 70px; }
 .diag-body { position: relative; z-index: 2; padding: 20px; background: color-mix(in srgb, var(--panel) 80%, transparent); min-height: 260px; }
-.gauge-body { position: relative; z-index: 2; padding: 20px; min-height: 300px; display: flex; flex-direction: column; justify-content: space-between; }
-.gauge-poster { position: absolute; inset: 0; display: grid; place-items: center; }
-.gauge-poster svg { width: 180px; }
+.gauge-body { position: relative; z-index: 2; padding: 20px; min-height: 320px; display: flex; flex-direction: column; justify-content: space-between; }
+.gauge-poster { position: absolute; inset: 0; display: grid; place-items: center; padding-bottom: 56px; }
+.gauge-poster svg { width: 150px; }
 .gauge-num { font-size: 2.4rem; line-height: 1; }
 .gauge-note { text-align: center; padding-bottom: 28px; }
 .diag-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; max-height: 260px; overflow: auto; }
