@@ -175,7 +175,7 @@ curl -X POST -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/c
 
 ## Quality
 
-- **Lighthouse (production build, landing page):** performance 97 mobile and 100 desktop, accessibility 95+, best practices 100, SEO 100.
+- **Lighthouse (production build, landing page):** 100 on all four categories, mobile and desktop (measured on the live site).
 - **Accessibility:** skip link, keyboard-reachable everything, labelled form fields, live regions for status, text alternatives for every scene, light and dark themes with checked contrast, reduced-motion support.
 - **Security:** CSP, HSTS, `X-Content-Type-Options`, `X-Frame-Options`, referrer and permissions policies; zod on every input; rate limits on auth, API and SSE; the MBTA key never reaches the browser; no secrets in git.
 

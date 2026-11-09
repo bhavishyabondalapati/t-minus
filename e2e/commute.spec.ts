@@ -67,3 +67,33 @@ test("protected API rejects anonymous callers", async ({ request }) => {
   expect((await request.get("/api/commutes")).status()).toBe(401);
   expect((await request.post("/api/cron/reconcile")).status()).toBe(401);
 });
+
+test.describe("static fallbacks", () => {
+  test.use({ reducedMotion: "reduce" });
+  test("reduced motion: no WebGL scenes run, posters are shown", async ({ page }) => {
+    await page.goto("/");
+    await page.mouse.move(300, 300);
+    await page.waitForTimeout(1500);
+    await expect(page.locator(".scene-live")).toHaveCount(0);
+    await expect(page.getByRole("img", { name: /Illustrated hills/ })).toBeVisible();
+  });
+});
+
+test.describe("phone", () => {
+  test.use({ viewport: { width: 390, height: 800 } });
+  test("phones get static images and plain nav links", async ({ page }) => {
+    await page.goto("/");
+    await page.mouse.move(100, 100);
+    await page.waitForTimeout(1500);
+    await expect(page.locator(".scene-live")).toHaveCount(0);
+    await expect(page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Reliability" })).toBeVisible();
+  });
+});
+
+test("only one scene is live at a time", async ({ page }) => {
+  await page.goto("/");
+  await page.mouse.move(300, 300);
+  await page.locator("#live-h").scrollIntoViewIfNeeded();
+  await page.waitForTimeout(3000);
+  expect(await page.locator(".scene-live").count()).toBeLessThanOrEqual(1);
+});
