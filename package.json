@@ -12,6 +12,9 @@
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:migrate:prod": "DB_TARGET=prod drizzle-kit migrate",
+    "db:seed:prod": "DB_TARGET=prod tsx scripts/seed.ts",
+    "db:report": "tsx scripts/db-report.mts",
     "db:seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
