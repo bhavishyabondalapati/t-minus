@@ -64,12 +64,15 @@ The MBTA key and all upstream calls stay on the server. Upstream responses are c
 
 ```
 .github/workflows/ci.yml          Lint, typecheck, unit tests and build on every push and PR
-.github/workflows/e2e.yml         Manual run of the Playwright suite against a deployed URL
 .github/workflows/reliability.yml Every 15 min: calls the protected reconcile endpoint
 DECISIONS.md                      Log of every non-obvious decision and why
 docs/                             README screenshots
 drizzle/                          Generated SQL migrations
-e2e/commute.spec.ts               Playwright: demo login, save commute, countdown, headers, auth guard
+e2e/commute.spec.ts               Playwright: read-only demo, signup + save commute + countdown, headers, auth guard
+e2e/guard.ts, global-teardown.ts  Refuse non-localhost / production DB; delete test users afterwards
+scripts/db-report.mts             Prints table sizes and write counts (dev or prod)
+src/lib/db/url.ts                 Chooses dev or production database URL safely
+src/lib/demo-policy.ts            Read-only rule for the demo account
 public/landscape.html             ThreeUI landscape scene document (MIT), served same-origin
 scripts/seed.ts                   Creates the demo account and two sample commutes
 scripts/screenshots.mjs           Regenerates the README screenshots
@@ -117,11 +120,12 @@ Environment variables (`.env.local`, never committed):
 
 | Name | What |
 | --- | --- |
-| `DATABASE_URL` | Neon connection string |
+| `DATABASE_URL_DEV` | Neon dev branch connection string. Used for local dev, tests and E2E |
+| `DATABASE_URL` | Neon production connection string. Used only on Vercel or with `DB_TARGET=prod` |
 | `MBTA_API_KEY` | Free key from https://api-v3.mbta.com/portal |
 | `CRON_SECRET` | Random secret for the scheduled job. Generate with `openssl rand -hex 32` |
 
-Create the tables and the demo account:
+Create the tables and the demo account on the dev branch (production uses `npm run db:migrate:prod` / `db:seed:prod`):
 
 ```bash
 npm run db:migrate
@@ -140,7 +144,8 @@ Tests and checks:
 npm test             # Vitest unit tests
 npm run lint
 npm run typecheck
-npm run test:e2e     # Playwright (builds and starts the app; needs .env.local and `npx playwright install chromium` once)
+npm run test:e2e     # Playwright on localhost against the dev DB only; refuses production. Needs `npx playwright install chromium` once
+npm run db:report    # table sizes and write counts (add `-- prod` for production)
 ```
 
 Trigger the reliability job by hand:
@@ -187,8 +192,9 @@ curl -X POST -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/c
 - Reliability stats start empty and fill in as the 15-minute job logs arrivals. Early numbers rest on few samples, and the page shows the sample count.
 - The ThreeUI scenes carry fixed content (for example the gauge dial), so real values are shown as text next to them rather than driving the dial.
 - A Vercel function can stream for at most 60 s, so the browser reconnects about once a minute.
-- The demo account is shared. Anyone using it can add or delete its commutes, and `npm run db:seed` resets it.
-- The Playwright suite stubs the live feed so it is deterministic. It is not run in CI automatically because it signs in against a real database.
+- The demo account is shared and read-only: the server rejects its writes with a 403.
+- Raw prediction logs are kept 14 days, then rolled into hourly aggregates (kept 90 days).
+- The Playwright suite stubs the live feed so it is deterministic. It runs locally only, never in CI and never against a deployed site.
 
 ## Credits
 

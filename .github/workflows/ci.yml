@@ -25,4 +25,5 @@ jobs:
         env:
           # Placeholders: the build does not call upstream services.
           DATABASE_URL: postgresql://user:pass@localhost/db
+          DATABASE_URL_DEV: postgresql://user:pass@localhost/devdb
           MBTA_API_KEY: ci-placeholder
