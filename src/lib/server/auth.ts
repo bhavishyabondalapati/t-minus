@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { and, eq, gt } from "drizzle-orm";
 import { hash, verify } from "@node-rs/argon2";
 import { getDb, schema } from "@/lib/db";
+import { demoWriteBlock } from "@/lib/demo-policy";
 
 export const SESSION_COOKIE = "tm_session";
 const SESSION_DAYS = 14;
@@ -70,4 +71,11 @@ export async function getSessionUser(): Promise<SessionUser | null> {
 export async function requireUser(): Promise<SessionUser | Response> {
   const u = await getSessionUser();
   return u ?? Response.json({ error: "Not signed in" }, { status: 401 });
+}
+
+/** For route handlers that change data: signed in, and not the read-only demo account. */
+export async function requireWritableUser(): Promise<SessionUser | Response> {
+  const u = await requireUser();
+  if (u instanceof Response) return u;
+  return demoWriteBlock(u) ?? u;
 }

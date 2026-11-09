@@ -1,9 +1,9 @@
 import { and, eq } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
-import { requireUser } from "@/lib/server/auth";
+import { requireWritableUser } from "@/lib/server/auth";
 
 export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string }> }) {
-  const user = await requireUser();
+  const user = await requireWritableUser();
   if (user instanceof Response) return user;
   const id = Number((await ctx.params).id);
   if (!Number.isInteger(id)) return Response.json({ error: "Bad id" }, { status: 400 });

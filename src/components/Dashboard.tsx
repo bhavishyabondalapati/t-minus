@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import LeaveArc from "./panels/LeaveArc";
 import Board from "./panels/Board";
@@ -131,7 +132,7 @@ export default function Dashboard({ email, isDemo, initial, stats }: { email: st
   const router = useRouter();
   const [commutes, setCommutes] = useState(initial);
   const [selected, setSelected] = useState<number | null>(initial[0]?.id ?? null);
-  const [adding, setAdding] = useState(initial.length === 0);
+  const [adding, setAdding] = useState(initial.length === 0 && !isDemo);
   const [lines, setLines] = useState<Line[]>([]);
 
   useEffect(() => {
@@ -164,14 +165,18 @@ export default function Dashboard({ email, isDemo, initial, stats }: { email: st
                 <span className="badge" style={{ ["--line" as string]: lineColor(c.routeId) }}><i />{c.routeId}</span>
                 <span>{c.name}</span>
               </button>
-              <button type="button" className="btn btn-sm" aria-label={`Delete ${c.name}`} onClick={() => remove(c.id)}>✕</button>
+              {!isDemo && <button type="button" className="btn btn-sm" aria-label={`Delete ${c.name}`} onClick={() => remove(c.id)}>✕</button>}
             </li>
           ))}
         </ul>
-        {!adding && commutes.length < 10 && <button className="btn btn-sm" onClick={() => setAdding(true)}>+ New commute</button>}
+        {isDemo ? (
+          <p className="note" data-testid="demo-note">Demo accounts are read-only. <Link href="/signup" onClick={async (e) => { e.preventDefault(); await fetch("/api/auth/logout", { method: "POST" }); router.push("/signup"); router.refresh(); }}>Create an account</Link> to save your own commutes.</p>
+        ) : (
+          !adding && commutes.length < 10 && <button className="btn btn-sm" onClick={() => setAdding(true)}>+ New commute</button>
+        )}
       </aside>
       <div>
-        {adding || !current ? (
+        {(adding && !isDemo) || !current ? (
           <NewCommuteForm lines={lines} onCancel={commutes.length ? () => setAdding(false) : undefined} onCreated={(c) => { setCommutes((p) => [c, ...p]); setSelected(c.id); setAdding(false); }} />
         ) : (
           <CommuteView key={current.id} c={current} lines={lines} stats={stats} />

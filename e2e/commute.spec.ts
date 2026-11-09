@@ -1,19 +1,13 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
-/** Demo login -> save a commute -> see the countdown. Live MBTA data is replaced by a deterministic stream. */
-test("demo user saves a commute and sees a leave-by countdown", async ({ page }) => {
-  const stamp = Date.now();
-  const name = `E2E commute ${stamp}`;
-
-  // Deterministic arrivals: one train in 15 minutes, none sooner.
+/** Replace the live MBTA feed with one deterministic train, 15 minutes away. */
+async function stubArrivals(page: Page) {
   await page.route("**/api/arrivals/stream**", async (route) => {
     const at = new Date(Date.now() + 15 * 60_000).toISOString();
     const data = {
       serverTime: Date.now(),
       stale: false,
-      predictions: [
-        { id: "e2e-1", tripId: "t1", routeId: "Red", stopId: "70075", directionId: 0, arrivalTime: at, departureTime: at, scheduledArrival: at, scheduleRelationship: null },
-      ],
+      predictions: [{ id: "e2e-1", tripId: "t1", routeId: "Red", stopId: "70075", directionId: 0, arrivalTime: at, departureTime: at, scheduledArrival: at, scheduleRelationship: null }],
       weather: { available: true, category: "clear", precipProbability: 0, shortForecast: "Sunny", tempF: 60 },
     };
     await route.fulfill({
@@ -22,36 +16,69 @@ test("demo user saves a commute and sees a leave-by countdown", async ({ page })
       body: `retry: 60000\n\nevent: arrivals\ndata: ${JSON.stringify(data)}\n\n`,
     });
   });
+}
 
-  await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Leave when the");
-
-  await page.getByRole("button", { name: "Try the demo" }).first().click();
-  await expect(page).toHaveURL(/\/app$/);
-
-  await page.getByRole("button", { name: "+ New commute" }).click();
-  const form = page.getByRole("form", { name: "Save a commute" });
-  await form.getByLabel("Name").fill(name);
-  await form.getByLabel("Line").selectOption("Red");
-  await expect(form.getByLabel("Board at")).toBeEnabled();
-  await form.getByLabel("Board at").selectOption({ label: "Park Street" });
-  await form.getByLabel("Get off at").selectOption({ label: "Kendall/MIT" });
-  await form.getByLabel("Walk to the platform (minutes)").fill("5");
-  await form.getByRole("button", { name: "Save commute" }).click();
-
-  await expect(page.getByRole("heading", { name })).toBeVisible();
-
-  // 15 min train - 5 min walk - 1 min buffer = about 9:00 left
+async function expectCountdownAbout9(page: Page) {
   const countdown = page.getByTestId("countdown");
-  await expect(countdown).toHaveText(/^0?[0-9]:[0-5][0-9]$|^[0-9]{2}:[0-5][0-9]$/);
-  const text = (await countdown.textContent()) ?? "";
-  const [m] = text.split(":").map(Number);
-  expect(m).toBeGreaterThanOrEqual(8);
+  await expect(countdown).toHaveText(/^[0-9]{1,2}:[0-5][0-9]$/);
+  const [m] = ((await countdown.textContent()) ?? "").split(":").map(Number);
+  expect(m).toBeGreaterThanOrEqual(8); // 15 min train - 5 min walk - 1 min buffer
   expect(m).toBeLessThanOrEqual(9);
+}
 
-  // Clean up so the shared demo account stays tidy.
-  await page.getByRole("button", { name: `Delete ${name}` }).click();
-  await expect(page.getByRole("button", { name: `Delete ${name}` })).toHaveCount(0);
+test.describe("demo account (read-only)", () => {
+  test("shows seeded commutes and a countdown, and cannot write", async ({ page }) => {
+    await stubArrivals(page);
+    await page.goto("/");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Leave when the");
+    await page.getByRole("button", { name: "Try the demo" }).first().click();
+    await expect(page).toHaveURL(/\/app$/);
+
+    await expect(page.getByTestId("countdown")).toHaveText(/^[0-9]{1,2}:[0-5][0-9]$/);
+    await expect(page.getByTestId("demo-note")).toContainText("read-only");
+    await expect(page.getByRole("button", { name: /^Delete / })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "+ New commute" })).toHaveCount(0);
+
+    // The server refuses writes no matter what the UI does.
+    const body = { name: "Nope", routeId: "Red", originStopId: "place-pktrm", destStopId: "place-harsq", walkMinutes: 5 };
+    const post = await page.request.post("/api/commutes", { data: body });
+    expect(post.status()).toBe(403);
+    expect((await post.json()).error).toContain("read-only");
+    const list = await (await page.request.get("/api/commutes")).json();
+    const del = await page.request.delete(`/api/commutes/${list.commutes[0].id}`);
+    expect(del.status()).toBe(403);
+    expect((await (await page.request.get("/api/commutes")).json()).commutes).toHaveLength(list.commutes.length);
+  });
+});
+
+test.describe("new account", () => {
+  // Fresh fake client IP so repeated runs do not trip the signup rate limit.
+  const ip = `10.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250)}`;
+  test.use({ extraHTTPHeaders: { "x-forwarded-for": ip } });
+
+  test("signs up, saves a commute and sees the countdown", async ({ page }) => {
+    await stubArrivals(page);
+    const name = `E2E commute ${Date.now()}`;
+    await page.goto("/signup");
+    await page.getByLabel("Email").fill(`e2e-${Date.now()}@example.test`);
+    await page.getByLabel("Password").fill("correct horse battery");
+    await page.getByRole("button", { name: "Create account" }).click();
+    await expect(page).toHaveURL(/\/app$/);
+
+    const form = page.getByRole("form", { name: "Save a commute" });
+    await form.getByLabel("Name").fill(name);
+    await form.getByLabel("Line").selectOption("Red");
+    await expect(form.getByLabel("Board at")).toBeEnabled();
+    await form.getByLabel("Board at").selectOption({ label: "Park Street" });
+    await form.getByLabel("Get off at").selectOption({ label: "Kendall/MIT" });
+    await form.getByLabel("Walk to the platform (minutes)").fill("5");
+    await form.getByRole("button", { name: "Save commute" }).click();
+
+    await expect(page.getByRole("heading", { name })).toBeVisible();
+    await expectCountdownAbout9(page);
+    await page.getByRole("button", { name: `Delete ${name}` }).click();
+    await expect(page.getByRole("button", { name: `Delete ${name}` })).toHaveCount(0);
+  });
 });
 
 test("security headers are present", async ({ request }) => {

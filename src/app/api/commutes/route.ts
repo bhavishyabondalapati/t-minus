@@ -1,6 +1,6 @@
 import { desc, eq, count } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
-import { requireUser } from "@/lib/server/auth";
+import { requireUser, requireWritableUser } from "@/lib/server/auth";
 import { commuteInputSchema } from "@/lib/validation";
 import { getLines, getStops } from "@/lib/server/mbta";
 import { clientIp, rateLimit, tooMany } from "@/lib/server/rate-limit";
@@ -15,7 +15,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const user = await requireUser();
+  const user = await requireWritableUser();
   if (user instanceof Response) return user;
   const rl = await rateLimit(`commute:${clientIp(req)}:${user.id}`, 30, 600);
   if (!rl.ok) return tooMany(rl);
