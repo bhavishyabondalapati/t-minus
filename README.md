@@ -1,6 +1,6 @@
 # T-Minus
 
-**Live site:** LIVE_URL_PLACEHOLDER · **Code:** https://github.com/bhavishyabondalapati/t-minus
+**Live site:** https://t-minus-drab.vercel.app · **Code:** https://github.com/bhavishyabondalapati/t-minus
 
 ![T-Minus dashboard: leave-by countdown, CRT departure board, on-time gauge and line status](docs/dashboard.png)
 

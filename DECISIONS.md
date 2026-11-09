@@ -14,3 +14,8 @@ Each entry: what I decided, and why. Newest at the bottom.
 10. **Scene slot = on screen.** A scene only competes for the one live WebGL slot while it is in the viewport. Priority: loader (100) > landscape (10) > arc (5) > CTA button (3) > board (2) > gauge/diagnostics (1). A per-panel "Live" switch pins a scene.
 11. **Weather location** is fixed at downtown Boston (42.3601, -71.0589) rather than per stop. One forecast per 10 minutes is enough for a buffer.
 12. **Direction** is inferred from stop order (destination after origin in route order = direction 0). On Red Line branches (Ashmont vs Braintree) that is approximate. Listed under known limits.
+13. **Live URL.** `t-minus.vercel.app` already belongs to someone else's project, so the live alias is `https://t-minus-drab.vercel.app` (the one Vercel assigned to this project).
+14. **One database.** Only one Neon `DATABASE_URL` was provided, so local development, the E2E run and production all use it. Migrations and the demo seed were applied to it once. E2E deletes the commute it creates.
+15. **E2E is manual in CI.** It signs in as the demo user against a real database, so putting DB credentials into Actions was not warranted. CI runs lint, typecheck, unit tests and a build. The Playwright suite has a manual workflow and passes locally and against the live URL.
+16. **Git author** was rewritten to the GitHub noreply address before the first push so the public history does not expose a personal email.
+17. **CSP** keeps `'unsafe-inline'` for scripts because Next.js emits inline bootstrap scripts and nonces would make every page dynamic. Everything else is locked to same-origin (plus Google Fonts for the ThreeUI loader).
