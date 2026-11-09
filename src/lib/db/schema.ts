@@ -10,6 +10,7 @@ import {
   uniqueIndex,
   index,
   primaryKey,
+  bigint,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -108,4 +109,22 @@ export const delayStats = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.routeId, t.hour] })],
+);
+
+/** Hourly roll-up of prediction_log rows older than the retention window (raw rows are then deleted). */
+export const predictionHourly = pgTable(
+  "prediction_hourly",
+  {
+    routeId: text("route_id").notNull(),
+    stopId: text("stop_id").notNull(),
+    directionId: integer("direction_id").notNull(),
+    hourStart: timestamp("hour_start", { withTimezone: true }).notNull(),
+    nTotal: integer("n_total").notNull(),
+    /** Arrivals that have a delay measurement (the ones the stats are built from). */
+    nDelay: integer("n_delay").notNull(),
+    sumDelaySec: bigint("sum_delay_sec", { mode: "number" }).notNull(),
+    /** Of nDelay: how many were within 5 minutes of schedule. */
+    nOntime: integer("n_ontime").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.routeId, t.stopId, t.directionId, t.hourStart] })],
 );

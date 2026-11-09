@@ -1,7 +1,7 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { getDb, schema } from "@/lib/db";
 import { getPredictions } from "@/lib/server/mbta";
-import { logPredictions, purgeOld, recomputeStats, resolveStale } from "@/lib/server/prediction-log";
+import { logPredictions, purgeOld, recomputeStats, resolveStale, rollupOld } from "@/lib/server/prediction-log";
 import { purgeOldRateLimits } from "@/lib/server/rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -50,8 +50,9 @@ export async function POST(req: Request) {
     }
   }
   const resolved = await resolveStale();
+  const rolledUp = await rollupOld();
   await recomputeStats();
   await purgeOld();
   await purgeOldRateLimits();
-  return Response.json({ ok: true, polled, failed, resolved });
+  return Response.json({ ok: true, polled, failed, resolved, rolledUp });
 }
