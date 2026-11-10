@@ -142,6 +142,7 @@ Tests and checks:
 
 ```bash
 npm test             # Vitest unit tests
+npm run test:db      # Retention roll-up SQL against the Neon dev branch, inside a transaction that is rolled back
 npm run lint
 npm run typecheck
 npm run test:e2e     # Playwright on localhost against the dev DB only; refuses production. Needs `npx playwright install chromium` once

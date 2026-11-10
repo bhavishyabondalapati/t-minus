@@ -15,7 +15,8 @@
     "db:migrate:prod": "DB_TARGET=prod drizzle-kit migrate",
     "db:seed:prod": "DB_TARGET=prod tsx scripts/seed.ts",
     "db:report": "tsx scripts/db-report.mts",
-    "db:seed": "tsx scripts/seed.ts"
+    "db:seed": "tsx scripts/seed.ts",
+    "test:db": "RUN_DB_TESTS=1 node --env-file=.env.local node_modules/vitest/vitest.mjs run tests/db/"
   },
   "dependencies": {
     "@designcodeio/threeui": "^1.2.0",
