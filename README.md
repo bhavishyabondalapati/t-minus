@@ -100,9 +100,11 @@ src/lib/server/cache.ts           Postgres read-through cache with stale fallbac
 src/lib/server/rate-limit.ts      Postgres fixed-window rate limiter
 src/lib/server/auth.ts            argon2, sessions, httpOnly cookie
 src/lib/server/prediction-log.ts  Logging, reconciliation and stats SQL
+src/lib/server/rollup-sql.ts      Retention roll-up statement (shared by the cron job and the DB test)
 src/components/                   Nav, footer, Scene wrapper, posters, panels, dashboard, forms
 src/components/live/              Lazy-loaded ThreeUI wrappers (one file per scene)
 tests/                            Vitest unit tests
+tests/db/rollup.db.test.ts        Roll-up SQL on the dev database, rolled back (npm run test:db)
 ```
 
 ## Setup
