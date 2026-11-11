@@ -47,3 +47,8 @@ __pycache__/
 test-results/
 playwright-report/
 .vercel
+
+# agent instruction files (Next.js re-creates AGENTS.md on `next dev`)
+AGENTS.md
+CLAUDE.md
+.claude/
