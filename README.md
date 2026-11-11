@@ -66,6 +66,8 @@ The MBTA key and all upstream calls stay on the server. Upstream responses are c
 .github/workflows/ci.yml          Lint, typecheck, unit tests and build on every push and PR
 .github/workflows/reliability.yml Every 15 min: calls the protected reconcile endpoint
 DECISIONS.md                      Log of every non-obvious decision and why
+LICENSE                           MIT license for this project's own code
+THIRD_PARTY_NOTICES.md            Licenses of the third-party code and assets in this repo
 docs/                             README screenshots
 drizzle/                          Generated SQL migrations
 e2e/commute.spec.ts               Playwright: read-only demo, signup + save commute + countdown, headers, auth guard
@@ -73,7 +75,7 @@ e2e/guard.ts, global-teardown.ts  Refuse non-localhost / production DB; delete t
 scripts/db-report.mts             Prints table sizes and write counts (dev or prod)
 src/lib/db/url.ts                 Chooses dev or production database URL safely
 src/lib/demo-policy.ts            Read-only rule for the demo account
-public/landscape.html             ThreeUI landscape scene document (MIT), served same-origin
+public/landscape.html             ThreeUI landscape scene document (MIT), served same-origin, with its audio removed
 scripts/seed.ts                   Creates the demo account and two sample commutes
 scripts/screenshots.mjs           Regenerates the README screenshots
 src/app/layout.tsx                Fonts, theme bootstrap, nav and footer
@@ -201,6 +203,12 @@ curl -X POST -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/c
 
 ## Credits
 
-- Scenes and controls: [ThreeUI](https://threeui.com) Community by Meng To, MIT license (https://github.com/MengTo/threeui). The catalog thumbnails on threeui.com are not MIT and are not used.
+- Scenes and controls: [ThreeUI](https://threeui.com) Community by Meng To, MIT license (https://github.com/MengTo/threeui). The catalog thumbnails on threeui.com are not MIT and are not used. `public/landscape.html` is a copy of the package's landscape scene (including its textures, which the package's asset notice lists as MIT) with the embedded music and sound clips removed, because that notice does not name audio.
 - Data: [MBTA V3 API](https://www.mbta.com/developers/v3-api) and the [National Weather Service API](https://www.weather.gov/documentation/services-web-api). This project is not affiliated with the MBTA.
 - Fonts: Instrument Serif, Fragment Mono and Onest, SIL Open Font License.
+
+## License
+
+This project's own code is released under the [MIT License](LICENSE). Copyright (c) 2026 Bhavishya Bondalapati.
+
+Third-party work keeps its own license and is not covered by that file: the ThreeUI components and scene document (MIT, Meng To), the bundled Three.js runtime (MIT), and the fonts (SIL OFL). The notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). MBTA and National Weather Service data are fetched live and are not stored in this repository.
